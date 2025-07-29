@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>캘린더</title>
+</head>
+<body>
+<h1 th:text="${yearMonth} + ' 일정 캘린더'">2025-07 일정 캘린더</h1>
+
+<a href="/schedule/write">➕ 일정 추가</a>
+<hr>
+
+<ul>
+    <li th:each="schedule : ${schedules}">
+        <b th:text="${schedule.date}">2025-07-29</b> -
+        <a th:href="@{/schedule/detail(id=${schedule.id})}"
+           th:text="${schedule.title}">제목</a>
+    </li>
+</ul>
+</body>
+</html>
