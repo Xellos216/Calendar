@@ -1,35 +1,20 @@
 # 📅 캘린더 프로젝트
-사용자는 일정을 등록하고, 월별로 일정을 확인하며, 각 일정에 댓글을 남길 수 있습니다.
-
----
-
-## ✅ 주요 기능
-| 기능             | 설명 |
-|------------------|------|
-| 📅 **월별 일정 확인** | 캘린더 페이지(`/calendar`)에서 월별로 등록된 일정 확인 |
-| ➕ **일정 등록**       | 일정 제목, 내용, 날짜를 입력해 생성 가능 |
-| 📌 **일정 상세 보기**   | 일정 클릭 시 내용과 댓글 확인 가능 |
-| 💬 **댓글 등록/삭제** | 일정 상세 페이지에서 댓글 작성 및 삭제 가능 |
-| ❌ **일정 삭제**       | 일정 상세 페이지에서 삭제 버튼 제공 |
-
----
 
 ## 🌐 URL 구조
 | URL                          | 메서드 | 설명               |
 |------------------------------|--------|--------------------|
-| `/calendar`                  | GET    | 월별 일정 리스트    |
-| `/schedule/write`           | GET    | 일정 등록 폼        |
-| `/schedule/write`           | POST   | 일정 등록 처리      |
-| `/schedule/detail?id={id}`  | GET    | 일정 상세 페이지     |
-| `/schedule/delete?id={id}`  | DELETE | 일정 삭제           |
-| `/comment/write`            | POST   | 댓글 등록 처리      |
-| `/comment/delete?id=...`    | DELETE | 댓글 삭제 처리      |
+| `/schedules`                 | GET    | 일정 전체 조회     |
+| `/schedules/{id}`            | GET    | 일정 상세 조회     |
+| `/schedules`                 | POST   | 일정 등록          |
+| `/schedules/{id}`            | PUT    | 일정 수정 (비밀번호 필요) |
+| `/schedules/{id}`            | DELETE | 일정 삭제 (비밀번호 필요) |
+| `/schedules/{id}/comments`   | POST   | 댓글 등록 (최대 10개) |
 
 ---
 
 # 📄 API 명세서
 
-## 1. 일정(Schedule) API
+## 1. Schedule API
 
 ### 1.1 일정 생성
 
@@ -37,7 +22,7 @@
 |------|------|
 | **URL** | POST /schedules |
 | **Request Body** | title (String, 필수, 최대 30자)<br>content (String, 필수, 최대 200자)<br>writer (String, 필수)<br>password (String, 필수) |
-| **Response** | 200 OK |
+| **Response** | 201 Created |
 | **Response Body** | id, title, content, writer, createdAt |
 | **Error** | 400 Bad Request - 필수값 누락, 글자수 초과 |
 
@@ -46,7 +31,7 @@
 | 항목 | 내용 |
 |------|------|
 | **URL** | GET /schedules |
-| **Request** | 없음 |
+| **Request** | (선택) writer 쿼리 파라미터 |
 | **Response** | 200 OK |
 | **Response Body** | 일정 배열(id, title, writer, createdAt) |
 
@@ -57,16 +42,17 @@
 | **URL** | GET /schedules/{id} |
 | **Request** | 없음 |
 | **Response** | 200 OK |
-| **Response Body** | id, title, content, writer, createdAt |
+| **Response Body** | id, title, content, writer, createdAt, comments[] |
 
 ### 1.4 일정 수정
 
 | 항목 | 내용 |
 |------|------|
 | **URL** | PUT /schedules/{id} |
-| **Request Body** | title (String, 선택)<br>writer (String, 선택)<br>password (String, 필수) |
+| **Request Body** | title (String, 필수)<br>writer (String, 필수)<br>password (String, 필수) |
 | **Response** | 200 OK |
-| **Error** | 401 Unauthorized - 비밀번호 불일치<br>400 Bad Request - 필수값 누락 |
+| **Response Body** | 수정된 일정 정보 |
+| **Error** | 403 Forbidden - 비밀번호 불일치<br>400 Bad Request - 유효성 실패 |
 
 ### 1.5 일정 삭제
 
@@ -75,11 +61,11 @@
 | **URL** | DELETE /schedules/{id} |
 | **Request Body** | password (String, 필수) |
 | **Response** | 204 No Content |
-| **Error** | 401 Unauthorized - 비밀번호 불일치<br>404 Not Found - 일정 없음 |
+| **Error** | 403 Forbidden - 비밀번호 불일치<br>404 Not Found - 일정 없음 |
 
 ---
 
-## 2. 댓글(Comment) API
+## 2. Comment API
 
 ### 2.1 댓글 작성
 
@@ -89,26 +75,7 @@
 | **Request Body** | comment (String, 필수, 최대 100자)<br>writer (String, 필수)<br>password (String, 필수) |
 | **Response** | 201 Created |
 | **Response Body** | id, comment, writer, createdAt |
-| **Error** | 400 Bad Request - 글자수 초과, 누락 |
-
-### 2.2 댓글 수정
-
-| 항목 | 내용 |
-|------|------|
-| **URL** | PUT /schedules/{id}/comments/{commentId} |
-| **Request Body** | comment (String, 필수)<br>password (String, 필수) |
-| **Response** | 200 OK |
-| **Error** | 401 Unauthorized - 비밀번호 불일치<br>404 Not Found - 댓글 없음 |
-
-### 2.3 댓글 삭제
-
-| 항목 | 내용 |
-|------|------|
-| **URL** | DELETE /schedules/{id}/comments/{commentId} |
-| **Request Body** | password (String, 필수) |
-| **Response** | 204 No Content |
-| **Error** | 401 Unauthorized - 비밀번호 불일치<br>404 Not Found - 댓글 없음 |
-
+| **Error** | 400 Bad Request - 필수값 누락, 글자수 초과<br>403 Forbidden - 댓글 10개 초과 시 |
 
 ---
 
@@ -117,14 +84,12 @@
 | 상태 코드 | 설명 |
 |-----------|------|
 | 400 | 잘못된 요청 (파라미터 누락, 형식 오류 등) |
-| 401 | 비밀번호 불일치 |
+| 403 | 비밀번호 불일치 |
 | 404 | 존재하지 않는 리소스 요청 |
-| 409 | 중복된 데이터 존재 |
-
 
 ---
 
-# 🗂 도메인 구조
+# 🗂 ERD
 
 ## 📝 Schedule
 
@@ -142,13 +107,22 @@
 
 ## 💬 Comment
 
-| 필드명    | 타입           | 설명               |
-|-----------|----------------|--------------------|
-| id        | Long           | PK                 |
-| schedule  | Schedule       | 연관 일정 (FK)     |
-| comment   | String         | 댓글 내용          |
-| writer    | String         | 댓글 작성자        |
-| password  | String         | 비밀번호           |
-| createdAt | LocalDateTime  | 댓글 생성 시각     |
-| createdAt | LocalDateTime  | 댓글 수정 시각     |
+| 필드명     | 타입           | 설명               |
+|------------|----------------|--------------------|
+| id         | Long           | PK                 |
+| scheduleId | Long           | FK - Schedule 참조 |
+| comment    | String         | 댓글 내용          |
+| writer     | String         | 댓글 작성자        |
+| password   | String         | 비밀번호           |
+| createdAt  | LocalDateTime  | 댓글 생성 시각     |
+| updatedAt  | LocalDateTime  | 댓글 수정 시각     |
 
+---
+
+# 📷 캡쳐
+![](./images/01.png)
+![](./images/02.png)
+![](./images/03.png)
+![](./images/04.png)
+![](./images/05.png)
+![](./images/06.png)

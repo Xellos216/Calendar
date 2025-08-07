@@ -13,15 +13,15 @@ public class CommentRequestDto {
 
     private Long scheduleId;
 
-    @NotBlank
-    @Size(max = 200)
+    @NotBlank(message = "댓글을 입력해")
+    @Size(max = 100, message = "100자 이하로 입력해")
     private String comment;
 
-    @NotBlank
+    @NotBlank(message = "이름을 입력해")
     @Size(max = 10)
     private String writer;
 
-    @NotBlank
-    @Size(max = 10)
+    @NotBlank(message = "비밀번호를 입력해")
+    @Size(max = 15)
     private String password;
 }

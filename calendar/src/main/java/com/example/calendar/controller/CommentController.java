@@ -2,6 +2,7 @@ package com.example.calendar.controller;
 
 import com.example.calendar.dto.CommentRequestDto;
 import com.example.calendar.dto.CommentResponseDto;
+import com.example.calendar.dto.DeleteCommentRequestDto;
 import com.example.calendar.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/schedules")
 public class CommentController {
-
     private final CommentService commentService;
 
     @PostMapping("/{id}/comments")
@@ -23,6 +23,16 @@ public class CommentController {
     ) {
         CommentResponseDto responseDto = commentService.createComment(id, requestDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @DeleteMapping("/{scheduleId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long scheduleId,
+            @PathVariable Long commentId,
+            @RequestBody @Valid DeleteCommentRequestDto requestDto
+    ) {
+        commentService.deleteComment(scheduleId, commentId, requestDto);
+        return ResponseEntity.noContent().build();
     }
 }
 

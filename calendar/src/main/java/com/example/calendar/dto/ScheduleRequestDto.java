@@ -10,20 +10,19 @@ import jakarta.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ScheduleRequestDto {
-
-    @NotBlank
-    @Size(max = 30)
+    @NotBlank(message = "제목을 입력해")
+    @Size(max = 30, message = "30자 이하로 입력해")
     private String title;
 
-    @NotBlank
-    @Size(max = 200)
+    @NotBlank(message = "내용을 입력해")
+    @Size(max = 200, message = "200자 이하로 입력해")
     private String content;
 
-    @NotBlank
+    @NotBlank(message = "이름을 입력해")
     @Size(max = 10)
     private String writer;
 
-    @NotBlank
-    @Size(max = 10)
+    @NotBlank(message = "비밀번호를 입력해")
+    @Size(max = 15)
     private String password;
 }

@@ -14,7 +14,6 @@ public class CommentResponseDto {
     private Long id;
     private String comment;
     private String writer;
-    private String password;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
@@ -23,7 +22,6 @@ public class CommentResponseDto {
                 comment.getId(),
                 comment.getComment(),
                 comment.getWriter(),
-                comment.getPassword(),
                 comment.getCreatedAt(),
                 comment.getModifiedAt()
         );

@@ -3,6 +3,7 @@ package com.example.calendar.controller;
 import com.example.calendar.dto.DeleteScheduleRequestDto;
 import com.example.calendar.dto.ScheduleRequestDto;
 import com.example.calendar.dto.ScheduleResponseDto;
+import com.example.calendar.dto.ScheduleUpdateRequestDto;
 import com.example.calendar.exception.ScheduleNotFoundException;
 import com.example.calendar.service.ScheduleService;
 import jakarta.validation.Valid;
@@ -43,14 +44,6 @@ public class ScheduleController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @RestControllerAdvice
-    public class GlobalExceptionHandler {
-        @ExceptionHandler(ScheduleNotFoundException.class)
-        public ResponseEntity<String> handleScheduleNotFound(ScheduleNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSchedule(
             @PathVariable Long id,
@@ -60,4 +53,20 @@ public class ScheduleController {
         return ResponseEntity.noContent().build(); // 204 No Content
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ScheduleResponseDto> updateSchedule(
+            @PathVariable Long id,
+            @RequestBody @Valid ScheduleUpdateRequestDto requestDto) {
+
+        ScheduleResponseDto responseDto = scheduleService.updateSchedule(id, requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @RestControllerAdvice
+    public class GlobalExceptionHandler {
+        @ExceptionHandler(ScheduleNotFoundException.class)
+        public ResponseEntity<String> handleScheduleNotFound(ScheduleNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+    }
 }
