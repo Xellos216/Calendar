@@ -1,61 +1,47 @@
 package com.example.calendar.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
+@Getter
+@NoArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 30)
     private String title;
 
+    @Column(nullable = false, length = 200)
     private String content;
 
-    private LocalDate date;
+    @Column(nullable = false)
+    private String writer;
 
+    @Column(nullable = false)
+    private String password;
+
+    @CreatedDate
+    @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @LastModifiedDate
+    private LocalDateTime modifiedAt;
 
-    // Getter & Setter
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
+    public Schedule(String title, String content, String writer, String password) {
         this.title = title;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
         this.content = content;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+        this.writer = writer;
+        this.password = password;
     }
 }
