@@ -4,8 +4,9 @@ import com.example.calendar.entity.Schedule;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -17,15 +18,16 @@ public class ScheduleResponseDto {
     private String writer;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-
-    public static ScheduleResponseDto from(Schedule schedule) {
+    private List<CommentResponseDto> comments;
+    public static ScheduleResponseDto from(Schedule schedule, List<CommentResponseDto> comments) {
         return new ScheduleResponseDto(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
                 schedule.getWriter(),
                 schedule.getCreatedAt(),
-                schedule.getModifiedAt()
+                schedule.getModifiedAt(),
+                comments
         );
     }
 }

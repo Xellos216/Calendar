@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CommentRequestDto {
 
+    private Long scheduleId;
+
     @NotBlank
     @Size(max = 200)
     private String comment;

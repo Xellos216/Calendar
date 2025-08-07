@@ -40,4 +40,21 @@ public class Comment {
 
     @LastModifiedDate
     private LocalDateTime modifiedAt;
+
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public void setWriter(String writer) {
+        this.writer = writer;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
+

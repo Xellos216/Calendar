@@ -17,7 +17,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/schedules")
 public class ScheduleController {
-
     private final ScheduleService scheduleService;
 
     @PostMapping
@@ -46,7 +45,6 @@ public class ScheduleController {
 
     @RestControllerAdvice
     public class GlobalExceptionHandler {
-
         @ExceptionHandler(ScheduleNotFoundException.class)
         public ResponseEntity<String> handleScheduleNotFound(ScheduleNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());

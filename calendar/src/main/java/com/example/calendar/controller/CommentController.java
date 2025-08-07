@@ -1,43 +1,28 @@
 package com.example.calendar.controller;
 
-import com.example.calendar.entity.Comment;
-import com.example.calendar.entity.Schedule;
+import com.example.calendar.dto.CommentRequestDto;
+import com.example.calendar.dto.CommentResponseDto;
 import com.example.calendar.service.CommentService;
-import com.example.calendar.service.ScheduleService;
-import org.springframework.stereotype.Controller;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/comment")
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/schedules")
 public class CommentController {
 
     private final CommentService commentService;
-    private final ScheduleService scheduleService;
 
-    public CommentController(CommentService commentService, ScheduleService scheduleService) {
-        this.commentService = commentService;
-        this.scheduleService = scheduleService;
-    }
-
-    // 댓글 작성
-    @PostMapping("/write")
-    public String write(@RequestParam Long scheduleId, @RequestParam String content) {
-        Schedule schedule = scheduleService.findById(scheduleId);
-
-        if (schedule != null && content != null && !content.trim().isEmpty()) {
-            Comment comment = new Comment();
-            comment.setSchedule(schedule);
-            comment.setContent(content);
-            commentService.save(comment);
-        }
-
-        return "redirect:/schedule/detail?id=" + scheduleId;
-    }
-
-    // 댓글 삭제
-    @GetMapping("/delete")
-    public String delete(@RequestParam Long id, @RequestParam Long scheduleId) {
-        commentService.delete(id);
-        return "redirect:/schedule/detail?id=" + scheduleId;
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<CommentResponseDto> createComment(
+            @PathVariable Long id,
+            @RequestBody @Valid CommentRequestDto requestDto
+    ) {
+        CommentResponseDto responseDto = commentService.createComment(id, requestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
 }
+
