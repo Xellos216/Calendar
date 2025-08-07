@@ -25,10 +25,10 @@ public class Schedule {
     @Column(nullable = false, length = 200)
     private String content;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String writer;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private String password;
 
     @CreatedDate
@@ -44,4 +44,10 @@ public class Schedule {
         this.writer = writer;
         this.password = password;
     }
+
+    public void update(String title, String writer) {
+        this.title = title;
+        this.writer = writer;
+    }
+
 }

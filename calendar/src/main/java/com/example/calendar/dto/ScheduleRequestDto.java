@@ -1,5 +1,6 @@
 package com.example.calendar.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
@@ -7,6 +8,7 @@ import jakarta.validation.constraints.Size;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class ScheduleRequestDto {
 
     @NotBlank
@@ -18,8 +20,10 @@ public class ScheduleRequestDto {
     private String content;
 
     @NotBlank
+    @Size(max = 10)
     private String writer;
 
     @NotBlank
+    @Size(max = 10)
     private String password;
 }

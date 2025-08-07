@@ -3,8 +3,10 @@ package com.example.calendar.service;
 import com.example.calendar.dto.ScheduleRequestDto;
 import com.example.calendar.dto.ScheduleResponseDto;
 import com.example.calendar.entity.Schedule;
+import com.example.calendar.exception.InvalidPasswordException;
 import com.example.calendar.exception.ScheduleNotFoundException;
 import com.example.calendar.repository.ScheduleRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +59,20 @@ public class ScheduleService {
     public ScheduleResponseDto getScheduleById(Long id) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new ScheduleNotFoundException(id));
+
+        return ScheduleResponseDto.from(schedule);
+    }
+
+    @Transactional
+    public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto requestDto) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ScheduleNotFoundException(id));
+
+        if (!schedule.getPassword().equals(requestDto.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+
+        schedule.update(requestDto.getTitle(), requestDto.getWriter());
 
         return ScheduleResponseDto.from(schedule);
     }
