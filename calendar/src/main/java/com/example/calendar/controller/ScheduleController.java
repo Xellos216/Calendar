@@ -1,5 +1,6 @@
 package com.example.calendar.controller;
 
+import com.example.calendar.dto.DeleteScheduleRequestDto;
 import com.example.calendar.dto.ScheduleRequestDto;
 import com.example.calendar.dto.ScheduleResponseDto;
 import com.example.calendar.exception.ScheduleNotFoundException;
@@ -52,5 +53,13 @@ public class ScheduleController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSchedule(
+            @PathVariable Long id,
+            @RequestBody @Valid DeleteScheduleRequestDto requestDto
+    ) {
+        scheduleService.deleteSchedule(id, requestDto);
+        return ResponseEntity.noContent().build(); // 204 No Content
+    }
 
 }

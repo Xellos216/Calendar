@@ -1,5 +1,6 @@
 package com.example.calendar.service;
 
+import com.example.calendar.dto.DeleteScheduleRequestDto;
 import com.example.calendar.dto.ScheduleRequestDto;
 import com.example.calendar.dto.ScheduleResponseDto;
 import com.example.calendar.entity.Schedule;
@@ -76,4 +77,17 @@ public class ScheduleService {
 
         return ScheduleResponseDto.from(schedule);
     }
+
+    @Transactional
+    public void deleteSchedule(Long id, DeleteScheduleRequestDto requestDto) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ScheduleNotFoundException(id));
+
+        if (!schedule.getPassword().equals(requestDto.getPassword())) {
+            throw new InvalidPasswordException();
+        }
+        scheduleRepository.delete(schedule);
+    }
 }
+
+
