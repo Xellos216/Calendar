@@ -26,9 +26,11 @@ public class ScheduleService {
     }
 
     @Transactional
-    public ScheduleResponseDto create(ScheduleRequestDto dto) {
-        User user = userRepository.findById(dto.userId())
+    public ScheduleResponseDto create(ScheduleRequestDto dto, Long sessionUserId) {
+        Long ownerId = sessionUserId;
+        User user = userRepository.findById(ownerId)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+
         Schedule saved = scheduleRepository.save(new Schedule(dto.title(), dto.contents(), user));
         return toDto(saved);
     }

@@ -29,6 +29,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
     implementation 'com.h2database:h2'
+    implementation 'org.springframework.security:spring-security-crypto'
 }
 
 tasks.named('test') {

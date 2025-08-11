@@ -1,7 +1,10 @@
 package com.example.calendar.controller;
 
-import com.example.calendar.dto.*;
+import com.example.calendar.dto.ScheduleRequestDto;
+import com.example.calendar.dto.ScheduleResponseDto;
+import com.example.calendar.dto.ScheduleUpdateRequestDto;
 import com.example.calendar.service.ScheduleService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,9 +22,18 @@ public class ScheduleController {
     public ScheduleController(ScheduleService scheduleService) { this.scheduleService = scheduleService; }
 
     @PostMapping
-    public ResponseEntity<ScheduleResponseDto> create(@RequestBody @Valid ScheduleRequestDto dto) {
-        var saved = scheduleService.create(dto);
-        return ResponseEntity.created(URI.create("/api/schedules/" + saved.id())).body(saved);
+    public ResponseEntity<ScheduleResponseDto> create(@RequestBody @Valid ScheduleRequestDto dto,
+                                                      HttpServletRequest req) {
+        var session = req.getSession(false);
+        if (session == null || session.getAttribute(AuthController.SESSION_KEY) == null) {
+            throw new IllegalArgumentException("로그인이 필요합니다.");
+        }
+        Long sessionUserId = (Long) session.getAttribute(AuthController.SESSION_KEY);
+
+        var saved = scheduleService.create(dto, sessionUserId);
+        return ResponseEntity
+                .created(URI.create("/api/schedules/" + saved.id()))
+                .body(saved);
     }
 
     @GetMapping("/{id}")
