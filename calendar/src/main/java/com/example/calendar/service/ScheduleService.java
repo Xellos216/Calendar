@@ -1,117 +1,71 @@
 package com.example.calendar.service;
 
 import com.example.calendar.dto.*;
-import com.example.calendar.entity.Comment;
 import com.example.calendar.entity.Schedule;
-import com.example.calendar.exception.InvalidPasswordException;
+import com.example.calendar.entity.User;
 import com.example.calendar.exception.ScheduleNotFoundException;
-import com.example.calendar.repository.CommentRepository;
 import com.example.calendar.repository.ScheduleRepository;
-import lombok.RequiredArgsConstructor;
+import com.example.calendar.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ScheduleService {
+
     private final ScheduleRepository scheduleRepository;
-    private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
 
-    public Schedule findById(Long id) {
-        return scheduleRepository.findById(id).orElse(null);
+    public ScheduleService(ScheduleRepository scheduleRepository, UserRepository userRepository) {
+        this.scheduleRepository = scheduleRepository;
+        this.userRepository = userRepository;
     }
 
-    public ScheduleResponseDto createSchedule(ScheduleRequestDto requestDto) {
-        Schedule schedule = new Schedule(
-                requestDto.getTitle(),
-                requestDto.getContent(),
-                requestDto.getWriter(),
-                requestDto.getPassword()
-        );
+    @Transactional
+    public ScheduleResponseDto create(ScheduleRequestDto dto) {
+        User user = userRepository.findById(dto.userId())
+                .orElseThrow(() -> new IllegalArgumentException("유저가 존재하지 않습니다."));
+        Schedule saved = scheduleRepository.save(new Schedule(dto.title(), dto.contents(), user));
+        return toDto(saved);
+    }
 
-        Schedule saved = scheduleRepository.save(schedule);
+    public ScheduleResponseDto get(Long id) {
+        Schedule s = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ScheduleNotFoundException(id));
+        return toDto(s);
+    }
 
+    public List<ScheduleResponseDto> getAll() {
+        return scheduleRepository.findAll().stream().map(this::toDto).toList();
+    }
+
+    @Transactional
+    public ScheduleResponseDto update(Long id, ScheduleUpdateRequestDto dto) {
+        Schedule s = scheduleRepository.findById(id)
+                .orElseThrow(() -> new ScheduleNotFoundException(id));
+        s.change(dto.title(), dto.contents());
+        return toDto(s);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        if (!scheduleRepository.existsById(id)) throw new ScheduleNotFoundException(id);
+        scheduleRepository.deleteById(id);
+    }
+
+    public Page<ScheduleResponseDto> getPageByUser(Long userId, Pageable pageable) {
+        return scheduleRepository.findAllByUser_Id(userId, pageable).map(this::toDto);
+    }
+
+    private ScheduleResponseDto toDto(Schedule s) {
         return new ScheduleResponseDto(
-                saved.getId(),
-                saved.getTitle(),
-                saved.getContent(),
-                saved.getWriter(),
-                saved.getCreatedAt(),
-                saved.getModifiedAt(),
-                new ArrayList<>()
+                s.getId(), s.getTitle(), s.getContents(),
+                s.getUser().getId(), s.getUser().getUsername(),
+                s.getCreatedAt(), s.getModifiedAt()
         );
-    }
-
-    public List<ScheduleResponseDto> getSchedules(String writer) {
-        List<Schedule> schedules;
-
-        if (writer == null || writer.isBlank()) {
-            schedules = scheduleRepository.findAllByOrderByCreatedAtDesc();
-        } else {
-            schedules = scheduleRepository.findByWriterOrderByCreatedAtDesc(writer);
-        }
-
-        return schedules.stream()
-                .map(schedule -> {
-                    List<Comment> commentList = commentRepository.findAllByScheduleIdOrderByCreatedAtAsc(schedule.getId());
-                    List<CommentResponseDto> commentDtos = commentList.stream()
-                            .map(CommentResponseDto::from)
-                            .collect(Collectors.toList());
-
-                    // schedule과 함께 commentDtos를 from() 메서드에 넘김
-                    return ScheduleResponseDto.from(schedule, commentDtos);
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Transactional(readOnly = true)
-    public ScheduleResponseDto getScheduleById(Long id) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ScheduleNotFoundException(id));
-
-        List<Comment> commentList = commentRepository.findAllByScheduleIdOrderByCreatedAtAsc(id);
-
-        List<CommentResponseDto> commentDtos = commentList.stream()
-                .map(CommentResponseDto::from)
-                .collect(Collectors.toList());
-
-        return ScheduleResponseDto.from(schedule, commentDtos);
-    }
-
-    @Transactional
-    public ScheduleResponseDto updateSchedule(Long id, ScheduleUpdateRequestDto requestDto) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ScheduleNotFoundException(id));
-
-        if (!schedule.getPassword().equals(requestDto.getPassword())) {
-            throw new InvalidPasswordException();
-        }
-
-        schedule.update(requestDto.getTitle(), requestDto.getWriter());
-
-        List<Comment> commentList = commentRepository.findAllByScheduleIdOrderByCreatedAtAsc(schedule.getId());
-        List<CommentResponseDto> commentDtos = commentList.stream()
-                .map(CommentResponseDto::from)
-                .collect(Collectors.toList());
-
-        return ScheduleResponseDto.from(schedule, commentDtos);
-    }
-
-
-    @Transactional
-    public void deleteSchedule(Long id, DeleteScheduleRequestDto requestDto) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new ScheduleNotFoundException(id));
-
-        if (!schedule.getPassword().equals(requestDto.getPassword())) {
-            throw new InvalidPasswordException();
-        }
-        scheduleRepository.delete(schedule);
     }
 }
-
-

@@ -1,53 +1,41 @@
 package com.example.calendar.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@NoArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "schedules")
 public class Schedule extends BaseTimeEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 30)
+    @Column(name = "title", length = 100, nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 200)
-    private String content;
+    @Column(name = "contents", columnDefinition = "TEXT", nullable = false)
+    private String contents;
 
-    @Column(nullable = false, length = 10)
-    private String writer;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(nullable = false, length = 20)
-    private String password;
+    protected Schedule() {}
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    private LocalDateTime modifiedAt;
-
-    public Schedule(String title, String content, String writer, String password) {
+    public Schedule(String title, String contents, User user) {
         this.title = title;
-        this.content = content;
-        this.writer = writer;
-        this.password = password;
+        this.contents = contents;
+        this.user = user;
     }
 
-    public void update(String title, String writer) {
+    public Long getId() { return id; }
+    public String getTitle() { return title; }
+    public String getContents() { return contents; }
+    public User getUser() { return user; }
+
+    public void change(String title, String contents) {
         this.title = title;
-        this.writer = writer;
+        this.contents = contents;
     }
 }
 

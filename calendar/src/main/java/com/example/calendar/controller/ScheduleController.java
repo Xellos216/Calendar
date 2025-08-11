@@ -1,72 +1,51 @@
 package com.example.calendar.controller;
 
-import com.example.calendar.dto.DeleteScheduleRequestDto;
-import com.example.calendar.dto.ScheduleRequestDto;
-import com.example.calendar.dto.ScheduleResponseDto;
-import com.example.calendar.dto.ScheduleUpdateRequestDto;
-import com.example.calendar.exception.ScheduleNotFoundException;
+import com.example.calendar.dto.*;
 import com.example.calendar.service.ScheduleService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
-@RequestMapping("/schedules")
+@RequestMapping("/api/schedules")
 public class ScheduleController {
+
     private final ScheduleService scheduleService;
+    public ScheduleController(ScheduleService scheduleService) { this.scheduleService = scheduleService; }
 
     @PostMapping
-    public ResponseEntity<ScheduleResponseDto> createSchedule(
-            @RequestBody @Valid ScheduleRequestDto requestDto
-    ) {
-        ScheduleResponseDto responseDto = scheduleService.createSchedule(requestDto);
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<ScheduleResponseDto>> getSchedules(
-            @RequestParam(required = false) String writer
-    ) {
-        List<ScheduleResponseDto> schedules = scheduleService.getSchedules(writer);
-        return ResponseEntity.ok(schedules);
+    public ResponseEntity<ScheduleResponseDto> create(@RequestBody @Valid ScheduleRequestDto dto) {
+        var saved = scheduleService.create(dto);
+        return ResponseEntity.created(URI.create("/api/schedules/" + saved.id())).body(saved);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ScheduleResponseDto> getScheduleById(
-            @PathVariable Long id
-    ) {
-        ScheduleResponseDto responseDto = scheduleService.getScheduleById(id);
-        return ResponseEntity.ok(responseDto);
+    public ScheduleResponseDto get(@PathVariable Long id) { return scheduleService.get(id); }
+
+    @GetMapping
+    public List<ScheduleResponseDto> getAll() { return scheduleService.getAll(); }
+
+    @PutMapping("/{id}")
+    public ScheduleResponseDto update(@PathVariable Long id,
+                                      @RequestBody @Valid ScheduleUpdateRequestDto dto) {
+        return scheduleService.update(id, dto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSchedule(
-            @PathVariable Long id,
-            @RequestBody @Valid DeleteScheduleRequestDto requestDto
-    ) {
-        scheduleService.deleteSchedule(id, requestDto);
-        return ResponseEntity.noContent().build(); // 204 No Content
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        scheduleService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ScheduleResponseDto> updateSchedule(
-            @PathVariable Long id,
-            @RequestBody @Valid ScheduleUpdateRequestDto requestDto) {
-
-        ScheduleResponseDto responseDto = scheduleService.updateSchedule(id, requestDto);
-        return ResponseEntity.ok(responseDto);
-    }
-
-    @RestControllerAdvice
-    public class GlobalExceptionHandler {
-        @ExceptionHandler(ScheduleNotFoundException.class)
-        public ResponseEntity<String> handleScheduleNotFound(ScheduleNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-        }
+    @GetMapping("/user/{userId}")
+    public Page<ScheduleResponseDto> pageByUser(@PathVariable Long userId,
+                                                @RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return scheduleService.getPageByUser(userId, PageRequest.of(page, size));
     }
 }
