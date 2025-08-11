@@ -1,60 +1,47 @@
 package com.example.calendar.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "comments", indexes = {
+        @Index(name = "idx_comments_schedule_id", columnList = "schedule_id"),
+        @Index(name = "idx_comments_user_id", columnList = "user_id")
+})
 public class Comment extends BaseTimeEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
+    private String contents;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "schedule_id")
+    @JoinColumn(name = "user_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_comment_user"))
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "schedule_id", nullable = false,
+            foreignKey = @ForeignKey(name = "fk_comment_schedule"))
     private Schedule schedule;
 
-    @Column(nullable = false, length = 200)
-    private String comment;
+    protected Comment() {}
 
-    @Column(nullable = false, length = 10)
-    private String writer;
-
-    @Column(nullable = false, length = 10)
-    private String password;
-
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdAt;
-
-    @LastModifiedDate
-    private LocalDateTime modifiedAt;
-
-    public void setSchedule(Schedule schedule) {
+    private Comment(String contents, User user, Schedule schedule) {
+        this.contents = contents;
+        this.user = user;
         this.schedule = schedule;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public static Comment of(String contents, User user, Schedule schedule) {
+        return new Comment(contents, user, schedule);
     }
 
-    public void setWriter(String writer) {
-        this.writer = writer;
-    }
+    public Long getId() { return id; }
+    public String getContents() { return contents; }
+    public User getUser() { return user; }
+    public Schedule getSchedule() { return schedule; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public void change(String contents) { this.contents = contents; }
 }
+
 
