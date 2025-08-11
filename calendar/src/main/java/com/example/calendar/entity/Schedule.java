@@ -1,10 +1,6 @@
 package com.example.calendar.entity;
 
-import com.example.calendar.dto.DeleteScheduleRequestDto;
-import com.example.calendar.exception.InvalidPasswordException;
-import com.example.calendar.exception.ScheduleNotFoundException;
 import jakarta.persistence.*;
-import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,7 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Schedule {
+public class Schedule extends BaseTimeEntity  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
