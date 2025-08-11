@@ -1,6 +1,7 @@
 package com.example.calendar.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "comments", indexes = {
@@ -11,7 +12,8 @@ public class Comment extends BaseTimeEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "contents", nullable = false, columnDefinition = "TEXT")
+    @Column(length = 100, nullable = false)
+    @Size(max = 100)
     private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

@@ -70,4 +70,8 @@ public class ScheduleService {
                 s.getCreatedAt(), s.getModifiedAt()
         );
     }
+
+    public Page<SchedulePageItemDto> getPageWithCommentCount(Pageable pageable) {
+        return scheduleRepository.findPageWithCommentCount(pageable);
+    }
 }

@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public class AuthFilter implements Filter {
-
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -35,7 +34,6 @@ public class AuthFilter implements Filter {
             res.getWriter().write("{\"message\":\"로그인이 필요합니다.\"}");
             return;
         }
-
         chain.doFilter(request, response);
     }
 }

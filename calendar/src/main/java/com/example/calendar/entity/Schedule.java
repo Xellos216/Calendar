@@ -1,6 +1,7 @@
 package com.example.calendar.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "schedules")
@@ -10,10 +11,13 @@ public class Schedule extends BaseTimeEntity  {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", length = 100, nullable = false)
+    @Column(length = 30, nullable = false)
+    @Size(max = 30)
     private String title;
 
-    @Column(name = "contents", columnDefinition = "TEXT", nullable = false)
+
+    @Column(length = 200, nullable = false)
+    @Size(max = 200)
     private String contents;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

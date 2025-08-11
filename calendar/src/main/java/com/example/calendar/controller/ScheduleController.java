@@ -1,5 +1,6 @@
 package com.example.calendar.controller;
 
+import com.example.calendar.dto.SchedulePageItemDto;
 import com.example.calendar.dto.ScheduleRequestDto;
 import com.example.calendar.dto.ScheduleResponseDto;
 import com.example.calendar.dto.ScheduleUpdateRequestDto;
@@ -8,6 +9,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +22,10 @@ import java.util.List;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
-    public ScheduleController(ScheduleService scheduleService) { this.scheduleService = scheduleService; }
+
+    public ScheduleController(ScheduleService scheduleService) {
+        this.scheduleService = scheduleService;
+    }
 
     @PostMapping
     public ResponseEntity<ScheduleResponseDto> create(@RequestBody @Valid ScheduleRequestDto dto,
@@ -36,12 +42,6 @@ public class ScheduleController {
                 .body(saved);
     }
 
-    @GetMapping("/{id}")
-    public ScheduleResponseDto get(@PathVariable Long id) { return scheduleService.get(id); }
-
-    @GetMapping
-    public List<ScheduleResponseDto> getAll() { return scheduleService.getAll(); }
-
     @PutMapping("/{id}")
     public ScheduleResponseDto update(@PathVariable Long id,
                                       @RequestBody @Valid ScheduleUpdateRequestDto dto) {
@@ -54,10 +54,29 @@ public class ScheduleController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{id}")
+    public ScheduleResponseDto get(@PathVariable Long id) {
+        return scheduleService.get(id);
+    }
+
+    @GetMapping
+    public List<ScheduleResponseDto> getAll() {
+        return scheduleService.getAll();
+    }
+
     @GetMapping("/user/{userId}")
     public Page<ScheduleResponseDto> pageByUser(@PathVariable Long userId,
                                                 @RequestParam(defaultValue = "0") int page,
                                                 @RequestParam(defaultValue = "10") int size) {
         return scheduleService.getPageByUser(userId, PageRequest.of(page, size));
+    }
+
+    @GetMapping("/page")
+    public Page<SchedulePageItemDto> getSchedulesPage(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "modifiedAt"));
+        return scheduleService.getPageWithCommentCount(pageable);
     }
 }
