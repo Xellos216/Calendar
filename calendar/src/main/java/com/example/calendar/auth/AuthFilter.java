@@ -14,13 +14,19 @@ public class AuthFilter implements Filter {
         HttpServletResponse res = (HttpServletResponse) response;
 
         String path = req.getRequestURI();
+        boolean isPost = "POST".equalsIgnoreCase(req.getMethod());
 
         boolean publicPath =
-                path.startsWith("/api/auth/login")
-                        || path.startsWith("/api/auth/logout")
-                        || path.startsWith("/api/users") && "POST".equalsIgnoreCase(req.getMethod())
-                        || path.startsWith("/h2-console")
-                        || path.equals("/") || path.startsWith("/static");
+                path.equals("/") ||
+                        path.startsWith("/login") ||
+                        path.startsWith("/signup") ||
+                        path.startsWith("/static/") ||
+                        path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/images/") ||
+                        path.startsWith("/favicon") ||
+                        path.startsWith("/h2-console") ||
+                        path.startsWith("/api/auth/login") ||
+                        path.startsWith("/api/auth/logout") ||
+                        (path.startsWith("/api/users") && isPost);
 
         if (publicPath) {
             chain.doFilter(request, response);
@@ -36,4 +42,6 @@ public class AuthFilter implements Filter {
         }
         chain.doFilter(request, response);
     }
+
+
 }

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Terminal Calendar</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        :root {
+            --bg: #000;
+            --fg: #0f0;
+            --link: #0ff;
+            --muted: #0a0;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html, body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--fg);
+            font-family: "Courier New", monospace;
+            white-space: pre;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 12vh
+        }
+
+        .content {
+            font-size: 2.5rem;
+            line-height: 1.6;
+            padding: 0 1rem
+        }
+
+        a {
+            color: var(--link);
+            text-decoration: none;
+            outline: none
+        }
+
+        a:focus {
+            outline: 2px solid var(--link)
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: -2.0ch;
+        }
+
+        .num1 {
+            display: inline-block;
+            width: 2ch;
+            text-align: right;
+            color: var(--fg);
+            margin-left: -6.0ch;
+        }
+
+        .num2 {
+            display: inline-block;
+            width: 2ch;
+            text-align: right;
+            color: var(--fg);
+            margin-left: -4.0ch;
+        }
+
+        .cur {
+            display: inline-block;
+            width: 2ch;
+            text-align: center;
+            color: var(--fg);
+            opacity: 0
+        }
+
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            font-size: 2.5rem;
+            line-height: 2
+        }
+
+        .item.selected .cur {
+            opacity: 1;
+            animation: blink 1s steps(1, end) infinite
+        }
+
+        .item.selected a {
+            text-decoration: underline
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: 0
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="content" role="main" aria-label="Terminal Calendar Home">
+ +-----------------------------------------+
+ |           Welcome to Calendar           |
+ +-----------------------------------------+
+    <div class="menu" role="menu">
+        <div class="item selected" data-href="/login/" role="menuitem">
+            <span class="num1">[1]</span><span class="cur">▸</span><a href="/login/">Login</a>
+        </div>
+        <div class="item" data-href="/signup/" role="menuitem">
+            <span class="num2">[2]</span><span class="cur">▸</span><a href="/signup/">Sign Up</a>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const items = [...document.querySelectorAll('.item')];
+    let i = 0;
+
+    function render() {
+        items.forEach((el, idx) => el.classList.toggle('selected', idx === i))
+    }
+
+    render();
+    document.addEventListener('keydown', e => {
+        if (['ArrowDown', 'ArrowRight'].includes(e.key)) {
+            i = (i + 1) % items.length;
+            render()
+        } else if (['ArrowUp', 'ArrowLeft'].includes(e.key)) {
+            i = (i - 1 + items.length) % items.length;
+            render()
+        } else if (e.key === 'Enter') {
+            location.href = items[i].dataset.href
+        }
+    });
+    items.forEach((el, idx) => el.addEventListener('mouseenter', () => {
+        i = idx;
+        render()
+    }));
+</script>
+</body>
+</html>
